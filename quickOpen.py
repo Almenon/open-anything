@@ -12,11 +12,18 @@ def qopen(name):
         return openDelimitedFile(name,',')
     elif(fileType == '.tsv'):
         return openDelimitedFile(name,'\t')
-    elif(any([name.find(protocol) for protocol in protocols])):
+    elif(fileType == '.json'):
+        return openJson(name)
+    elif(any([protocol in name for protocol in protocols])):
         openWebsite(name)
     else:
         return openTextFile(name)
 
+def openJson(name):
+    module = import_module('json')
+    load = getattr(module, 'load')
+    with open(name) as f:
+        return load(f)
 
 def openWebsite(url):
     try:
@@ -45,8 +52,8 @@ def openDelimitedFile(name,delimiter):
             return [line for line in csvReader]
 
 
-result = qopen('http://www.omdbapi.com/?t=Game%20of%20Thrones&Season=1&Episode=1')
-print(result)
+#result = qopen('temp.txt')
+#print(result)
 
 # links::
 # http://stackoverflow.com/questions/12136850/tab-delimited-file-using-csv-reader-not-delimiting-where-i-expect-it-to
