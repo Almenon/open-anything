@@ -101,8 +101,84 @@ def check_boms(byte_str): # adapted from chardet library
         return "UTF-16"
     return None
 
+def open_word_doc(name):
+    raise NotImplementedError
+    # https://python-docx.readthedocs.io/en/latest/index.html
 
+def open_excel(name):
+    raise NotImplementedError
+    # http://www.python-excel.org/
+    # or just use pandas
+    # http://stackoverflow.com/questions/3239207/how-can-i-open-an-excel-file-in-python
 
+def open_pdf(name):
+    raise NotImplementedError
+    # https://github.com/mstamy2/PyPDF2
+
+def open_epub(name):
+    raise NotImplementedError
+    # https://pypi.python.org/pypi/epub/
+
+def open_kdbx(name):
+    raise NotImplementedError
+    # https://pypi.python.org/pypi/libkeepass
+
+def open_odt(name):
+    raise NotImplementedError
+    # https://pypi.python.org/pypi/odfpy
+
+def open_html(name):
+    raise NotImplementedError
+    # try beautiful soup
+    # else try python inbuilt html parser
+
+def open_wav(name):
+    raise  NotImplementedError
+    # https://docs.python.org/3/library/wave.html
+
+def open_au(name):
+    raise NotImplementedError
+    # https://docs.python.org/3.6/library/sunau.html
+
+def open_aiff(name):
+    raise NotImplementedError
+    # https://docs.python.org/3.6/library/aifc.html
+
+def open_aifc(name):
+    raise NotImplementedError
+    # https://docs.python.org/3.6/library/aifc.html
+
+def open_gzip(name):
+    raise NotImplementedError
+    # https://docs.python.org/3.6/library/gzip.html
+
+def open_zip(name):
+    raise NotImplementedError
+    # https://docs.python.org/3.6/library/zipfile.html
+
+def open_tar(name):
+    raise NotImplementedError
+    # https://docs.python.org/3.6/library/tarfile.html
+
+def open_p(name):
+    raise NotImplementedError
+    # https://docs.python.org/3.6/library/pickle.html
+
+def open_netrx(name):
+    raise NotImplementedError
+    # https://docs.python.org/3.6/library/netrc.html
+
+def open_plist(name):
+    raise NotImplementedError
+    # https://docs.python.org/3.6/library/plistlib.html
+
+def open_ini(name):
+    raise NotImplementedError
+    # https://docs.python.org/3.6/library/configparser.html
+
+def open_sav(name):
+    raise NotImplementedError
+    # https://pypi.python.org/pypi/savReaderWriter/3.4.2
 
 # result = qopen('testFiles\\t.xml')
 # print(result)
@@ -112,3 +188,8 @@ def check_boms(byte_str): # adapted from chardet library
 # http://stackoverflow.com/questions/3323770/character-detection-in-a-text-file-in-python-using-the-universal-encoding-detect
 # http://stackoverflow.com/questions/9804777/how-to-test-if-a-string-is-json-or-not
 # http://stackoverflow.com/questions/9652832/how-to-i-load-a-tsv-file-into-a-pandas-dataframe
+
+# guess file type?
+
+# https://pypi.python.org/pypi/filemagic/1.6
+# https://docs.python.org/3.6/library/mimetypes.html
