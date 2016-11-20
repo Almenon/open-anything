@@ -9,7 +9,10 @@ protocols = ['https://','http://','www.']
 def qopen(name,size=None):
     try:
         fileName, fileType = path.splitext(name)
-        if(fileType == '.csv'):
+        if(any([protocol in name for protocol in protocols])):
+            openWebsite(name)
+            # todo: if url has file extension, call method for parsing that file type
+        elif(fileType == '.csv'):
             return openDelimitedFile(name, ',')
         elif(fileType == '.tsv'):
             return openDelimitedFile(name, '\t')
@@ -19,8 +22,6 @@ def qopen(name,size=None):
             return openLnk(name)
         elif(fileType == '.xml'):
             return openXml(name)
-        elif(any([protocol in name for protocol in protocols])):
-            openWebsite(name)
         else:
             return openTextFile(name, size)
     except MemoryError as e:
