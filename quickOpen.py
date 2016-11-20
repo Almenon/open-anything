@@ -1,5 +1,6 @@
 from importlib import import_module
 from os import path
+from codecs import BOM_UTF32_LE,BOM_UTF32_BE,BOM_LE,BOM_UTF8,BOM_BE
 #importlib.find_loader()
 #importlib.import_module()
 
@@ -9,9 +10,9 @@ def qopen(name,size=None):
     try:
         fileName, fileType = path.splitext(name)
         if(fileType == '.csv'):
-            return openDelimitedFile(name, ',', size)
+            return openDelimitedFile(name, ',')
         elif(fileType == '.tsv'):
-            return openDelimitedFile(name, '\t', size)
+            return openDelimitedFile(name, '\t')
         elif(fileType == '.json'):
             return openJson(name)
         elif(fileType == '.lnk'):
@@ -57,11 +58,10 @@ def openWebsite(url):
         return urlopen(url)
 
 def openTextFile(name, size):
-    with open(name) as f:
+    with open(name,encoding=get_encoding(name)) as f:
         return f.read(size)
 
-def openDelimitedFile(name,delimiter, size):
-    if(size is not None): print('size param not supported yet')
+def openDelimitedFile(name,delimiter):
     try:
         module = import_module('pandas')
         read_csv = getattr(module,'read_csv')
@@ -69,9 +69,39 @@ def openDelimitedFile(name,delimiter, size):
     except ImportError:
         module = import_module('csv')
         DictReader = getattr(module,'DictReader')
-        with open(name) as f:
+        with open(name,encoding=get_encoding(name)) as f:
             csvReader = DictReader(f,delimiter=delimiter)
             return [line for line in csvReader]
+
+def get_encoding(name):
+    try:
+        module = import_module('chardet')
+        detect = getattr(module, 'detect')
+        with open(name, 'rb') as f:
+            encoding = detect(f.read(1024))
+            print(encoding)
+            return encoding['encoding']
+    except ImportError:
+        with open(name,'rb') as f:
+            encoding = check_boms(f.read(4))
+            return encoding
+
+
+def check_boms(byte_str): # adapted from chardet library
+    if byte_str.startswith(BOM_UTF8):
+        # EF BB BF  UTF-8 with BOM
+        return "UTF-8-SIG"
+    elif byte_str.startswith(BOM_UTF32_LE) or byte_str.startswith(BOM_UTF32_BE):
+        # FF FE 00 00  UTF-32, little-endian BOM
+        # 00 00 FE FF  UTF-32, big-endian BOM
+        return "UTF-32"
+    elif byte_str.startswith(BOM_LE) or byte_str.startswith(BOM_BE):
+        # FF FE  UTF-16, little endian BOM
+        # FE FF  UTF-16, big endian BOM
+        return "UTF-16"
+    return None
+
+
 
 
 # result = qopen('testFiles\\t.xml')
