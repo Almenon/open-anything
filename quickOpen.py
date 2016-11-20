@@ -10,7 +10,7 @@ def qopen(name,size=None):
     try:
         fileName, fileType = path.splitext(name)
         if(any([protocol in name for protocol in protocols])):
-            openWebsite(name)
+            return openWebsite(name)
             # todo: if url has file extension, call method for parsing that file type
         elif(fileType == '.csv'):
             return openDelimitedFile(name, ',')
@@ -52,7 +52,7 @@ def openWebsite(url):
     try:
         module = import_module('pandas')
         read_table = getattr(module, 'read_csv')
-        table = read_table(url)
+        return read_table(url)
     except ImportError:
         module = import_module('urllib.request')
         urlopen = getattr(module, 'urlopen')
