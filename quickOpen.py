@@ -1,6 +1,7 @@
 from importlib import import_module
 from os import path
 from codecs import BOM_UTF32_LE,BOM_UTF32_BE,BOM_LE,BOM_UTF8,BOM_BE
+from sys import version_info
 #importlib.find_loader()
 #importlib.import_module()
 
@@ -9,9 +10,9 @@ protocols = ['https://','http://','www.']
 def qopen(name,size=None):
     try:
         fileName, fileType = path.splitext(name)
-        if(any([protocol in name for protocol in protocols])):
-            openWebsite(name)
-            # todo: if url has file extension, call method for parsing that file type
+        if(is_website(name)):
+            open_website(name)
+            # todo: recognize IP's / localhost
         elif(fileType == '.csv'):
             return openDelimitedFile(name, ',')
         elif(fileType == '.tsv'):
@@ -32,47 +33,57 @@ def qopen(name,size=None):
         else: print(e)
 
 
-def openXml(name):
-    module = import_module('xml.etree.ElementTree')
-    parse = getattr(module, 'parse')
-    return parse(name)
-
-def openLnk(name):
-    print('lnk files not supported yet\n'
-          'try installing https://pypi.python.org/pypi/pylnk/')
+def is_website(name):
+    return any([protocol in name for protocol in protocols]) \
+            or is_ip(name) \
+            or 'localhost' in name[:9]
 
 
-def openJson(name):
-    module = import_module('json')
-    load = getattr(module, 'load')
-    with open(name) as f:
-        return load(f)
+def is_ip(name):
+    if version_info >= (3,4,5):
+        try:
+            module = import_module('ipaddress')
+            ip_address = getattr(module, 'ip_address')
+            ip_address(name) # doesn't accept binary IP's
+            return True
+        except ValueError:
+            return False
+    else: # darnit, upgrade your python
+        return check_ipv4(name) or check_ipv6(name)
 
-def openWebsite(url):
-    try:
-        module = import_module('pandas')
-        read_table = getattr(module, 'read_csv')
-        table = read_table(url)
-    except ImportError:
-        module = import_module('urllib.request')
-        urlopen = getattr(module, 'urlopen')
-        return urlopen(url)
 
-def openTextFile(name, size):
-    with open(name,encoding=get_encoding(name)) as f:
-        return f.read(size)
+def check_ipv4(value): # credit to wtforms
+    parts = value.split('.')
+    if len(parts) == 4 and all(x.isdigit() for x in parts):
+        numbers = list(int(x) for x in parts)
+        return all(num >= 0 and num < 256 for num in numbers)
+    return False
 
-def openDelimitedFile(name,delimiter):
-    try:
-        module = import_module('pandas')
-        read_csv = getattr(module,'read_csv')
-        return read_csv(name,sep=delimiter)
-    except ImportError:
-        module = import_module('csv')
-        DictReader = getattr(module,'DictReader')
-        with open(name,encoding=get_encoding(name)) as f:
-            csvReader = DictReader(f,delimiter=delimiter)
-            return [line for line in csvReader]
+
+def check_ipv6(value): # credit to wtforms
+    parts = value.split(':')
+    if len(parts) > 8:
+        return False
+
+    num_blank = 0
+    for part in parts:
+        if not part:
+            num_blank += 1
+        else:
+            try:
+                value = int(part, 16)
+            except ValueError:
+                return False
+            else:
+                if value < 0 or value >= 65536:
+                    return False
+
+    if num_blank < 2:
+        return True
+    elif num_blank == 2 and not parts[0] and not parts[1]:
+        return True
+    return False
+
 
 def get_encoding(name):
     try:
@@ -102,9 +113,53 @@ def check_boms(byte_str): # adapted from chardet library
         return "UTF-16"
     return None
 
+
+def openXml(name):
+    module = import_module('xml.etree.ElementTree')
+    parse = getattr(module, 'parse')
+    return parse(name)
+
+
+def openLnk(name):
+    print('lnk files not supported yet\n'
+          'try installing https://pypi.python.org/pypi/pylnk/')
+
+
+def openJson(name):
+    module = import_module('json')
+    load = getattr(module, 'load')
+    with open(name) as f:
+        return load(f)
+
+
+def open_website(url):
+    module = import_module('urllib.request')
+    urlopen = getattr(module, 'urlopen')
+    return urlopen(url)
+    # todo: check "Content-type" HTTP header, call method for parsing that content type
+
+
+def openTextFile(name, size):
+    with open(name,encoding=get_encoding(name)) as f:
+        return f.read(size)
+
+
+def openDelimitedFile(name,delimiter):
+    try:
+        module = import_module('pandas')
+        read_csv = getattr(module,'read_csv')
+        return read_csv(name,sep=delimiter)
+    except ImportError:
+        module = import_module('csv')
+        DictReader = getattr(module,'DictReader')
+        with open(name,encoding=get_encoding(name)) as f:
+            csvReader = DictReader(f,delimiter=delimiter)
+            return [line for line in csvReader]
+
 def open_word_doc(name):
     raise NotImplementedError
     # https://python-docx.readthedocs.io/en/latest/index.html
+
 
 def open_excel(name):
     raise NotImplementedError
@@ -112,70 +167,87 @@ def open_excel(name):
     # or just use pandas
     # http://stackoverflow.com/questions/3239207/how-can-i-open-an-excel-file-in-python
 
+
 def open_pdf(name):
     raise NotImplementedError
     # https://github.com/mstamy2/PyPDF2
+
 
 def open_epub(name):
     raise NotImplementedError
     # https://pypi.python.org/pypi/epub/
 
+
 def open_kdbx(name):
     raise NotImplementedError
     # https://pypi.python.org/pypi/libkeepass
 
+
 def open_odt(name):
     raise NotImplementedError
     # https://pypi.python.org/pypi/odfpy
+
 
 def open_html(name):
     raise NotImplementedError
     # try beautiful soup
     # else try python inbuilt html parser
 
+
 def open_wav(name):
     raise  NotImplementedError
     # https://docs.python.org/3/library/wave.html
+
 
 def open_au(name):
     raise NotImplementedError
     # https://docs.python.org/3.6/library/sunau.html
 
+
 def open_aiff(name):
     raise NotImplementedError
     # https://docs.python.org/3.6/library/aifc.html
+
 
 def open_aifc(name):
     raise NotImplementedError
     # https://docs.python.org/3.6/library/aifc.html
 
+
 def open_gzip(name):
     raise NotImplementedError
     # https://docs.python.org/3.6/library/gzip.html
+
 
 def open_zip(name):
     raise NotImplementedError
     # https://docs.python.org/3.6/library/zipfile.html
 
+
 def open_tar(name):
     raise NotImplementedError
     # https://docs.python.org/3.6/library/tarfile.html
+
 
 def open_p(name):
     raise NotImplementedError
     # https://docs.python.org/3.6/library/pickle.html
 
+
 def open_netrx(name):
     raise NotImplementedError
     # https://docs.python.org/3.6/library/netrc.html
+
 
 def open_plist(name):
     raise NotImplementedError
     # https://docs.python.org/3.6/library/plistlib.html
 
+
 def open_ini(name):
     raise NotImplementedError
     # https://docs.python.org/3.6/library/configparser.html
+
 
 def open_sav(name):
     raise NotImplementedError
