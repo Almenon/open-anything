@@ -11,8 +11,7 @@ def qopen(name,size=None):
     try:
         fileName, fileType = path.splitext(name)
         if(is_website(name)):
-            open_website(name)
-            # todo: recognize IP's / localhost
+            return open_website(name)
         elif(fileType == '.csv'):
             return openDelimitedFile(name, ',')
         elif(fileType == '.tsv'):
