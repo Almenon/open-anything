@@ -1,0 +1,273 @@
+audio: 3ga aac aif aifc aiff amr au aup caf flac gsm iff kar m4a m4p m4r mid midi mmf mp2 mp3 mpa mpga ogg oma opus qcp ra ram wav wma xspf
+plain text:
+
+0 — Plain Text Document, Normally used for licensing
+1ST — Plain Text Document, Normally preceded by the words "README" (README.1ST)
+600 — Plain Text Document, Used in UNZIP history log
+602 — Text602 document
+ABW — AbiWord Document
+ACL — MS Word AutoCorrect List
+AFP — Advanced Function Presentation — IBc
+AMI — Lostus Ami Pro
+Amigaguide
+ANS — American National Standards Institute (ANSI) text
+ASC — ASCII text
+AWW — Ability Write
+CCF — Color Chat 1.0
+CSV — ASCII text as comma-separated values, used in spreadsheets and database management systems
+CWK — ClarisWorks / AppleWorks document
+DBK — DocBook XML sub-format
+DOC — Microsoft Word document
+DOCM — Microsoft Word macro-enabled document
+DOCX — Office Open XML document
+DOT — Microsoft Word document template
+DOTX — Office Open XML text document template
+EGT — EGT Universal Document
+EPUB — EPUB open standard for e-books
+EZW — Reagency Systems easyOFFER document[4]
+FDX — Final Draft
+FTM — Fielded Text Meta
+FTX — Fielded Text (Declared)
+GDOC — Google Drive Document
+HTML — HyperText Markup Language (.html, .htm)
+HWP — Haansoft (Hancom) Hangul Word Processor document
+HWPML — Haansoft (Hancom) Hangul Word Processor Markup Language document
+LOG — Text log file
+LWP — Lotus Word Pro
+MBP — metadata for Mobipocket documents
+MD — Markdown text document
+ME — Plain text document normally preceded by the word "READ" (READ.ME)
+MCW — Microsoft Word for Macintosh (versions 4.0–5.1)
+Mobi — Mobipocket documents
+NB — Mathematica Notebook
+NBP — Mathematica Player Notebook
+NEIS - 학교생활기록부 작성 프로그램(Student Record Writing Program) Document
+ODM — OpenDocument master document
+ODT — OpenDocument text document
+OTT — OpenDocument text document template
+OMM — OmmWriter text document
+PAGES — Apple Pages document
+PAP — Papyrus word processor document
+PDAX — Portable Document Archive (PDA) document index file
+PDF — Portable Document Format
+QUOX — Question Object File Format for Quobject Designer or Quobject Explorer
+Radix-64
+RTF — Rich Text document
+RPT — Crystal Reports
+SDW — StarWriter text document, used in earlier versions of StarOffice
+SE — Shuttle Document
+STW — OpenOffice.org XML (obsolete) text document template
+Sxw — OpenOffice.org XML (obsolete) text document
+TeX — TeX
+INFO — Texinfo
+Troff
+TXT — ASCII nebo Unicode plaintext Text file
+UOF — Uniform Office Format
+UOML — Unique Object Markup Language
+VIA — Revoware VIA Document Project File
+WPD — WordPerfect document
+WPS — Microsoft Works document
+WPT — Microsoft Works document template
+WRD — WordIt! document
+WRF — ThinkFree Write
+WRI — Microsoft Write document
+XHTML (xhtml, XHT..) — eXtensible Hyper-Text Markup Language
+XML — eXtensible Markup Language
+XPS — Open XML Paper Specification
+
+
+http://www.online-convert.com/
+
+https://www.file-extensions.org/filetype/extension/name/audio-and-sound-files  (lots!)
+
+
+
+https://en.wikipedia.org/wiki/List_of_file_formats#Sound_and_music (more detailed)
+
+
+'DOCX': open_txt,  # http://python-docx.readthedocs.io/en/latest/user/documents.html
+'PDF': open_txt,  # https://www.binpress.com/tutorial/manipulating-pdfs-with-python/167
+'ODT': open_txt,  # https://pypi.python.org/pypi/odfpy
+'Mobi': open_txt,  # https://github.com/kroo/mobi-python # https://pypi.python.org/pypi/epub/  # http://stackoverflow.com/questions/3114786/python-library-to-extract-epub-information
+
+
+
+{"application/rtf": [".rtf"],
+  "audio/midi": [".midi", ".mid"],
+  "text/xul": [".xul"],
+  "application/msaccess": [".ade", ".adp", ".mdb", ".mde", ".mda", ".accdb"],
+  "application/msonenote": [".onepkg", ".one"],
+  "application/msword": [".wbk", ".wiz", ".doc", ".rtf", ".dot"],
+  "application/octet-stream": [".a",
+   ".bin",
+   ".hxd",
+   ".hxw",
+   ".o",
+   ".obj",
+   ".hxs",
+   ".hxq",
+   ".hxi",
+   ".hxr",
+   ".hxh"],
+  "application/pkcs7-mime": [".p7c", ".p7m"],
+  "application/postscript": [".eps", ".ai", ".ps"],
+  "application/vnd.ms-excel": [".xld",
+   ".xll",
+   ".xlm",
+   ".csv",
+   ".xlk",
+   ".xls",
+   ".xlb",
+   ".xlw",
+   ".xlt",
+   ".slk",
+   ".xla"],
+  "application/vnd.ms-powerpoint": [".ppt", ".pwz", ".pps", ".pot", ".ppa"],
+  "application/vnd.ms-publisher": [".ols", ".pub"],
+  "application/vnd.ms-visio.viewer": [".vsd",
+   ".vtx",
+   ".vdx",
+   ".vst",
+   ".vsx",
+   ".vss"],
+  "application/x-director": [".dxr", ".dir", ".dcr"],
+  "application/x-msdownload": [".exe", ".dll"],
+  "application/x-netcdf": [".cdf", ".nc"],
+  "application/x-pkcs12": [".p12", ".pfx"],
+  "application/x-pkcs7-certificates": [".spc", ".p7b"],
+  "application/x-python-code": [".pyc", ".pyo"],
+  "application/x-texinfo": [".texinfo", ".texi"],
+  "application/x-troff": [".t", ".tr", ".roff"],
+  "application/x-x509-ca-cert": [".der", ".cer", ".crt"],
+  "application/x-zip-compressed": [".pyzw", ".zip", ".pyz"],
+  "application/xhtml+xml": [".xht", ".xhtml"],
+  "application/xml": [".hxe",
+   ".hxk",
+   ".datasource",
+   ".master",
+   ".testrunconfig",
+   ".shproj",
+   ".xslt",
+   ".config",
+   ".trx",
+   ".skin",
+   ".coverage",
+   ".resx",
+   ".xsd",
+   ".asa",
+   ".aspx",
+   ".wiq",
+   ".svc",
+   ".hxc",
+   ".hxt",
+   ".orderedtest",
+   ".wsdl",
+   ".asmx",
+   ".xpdl",
+   ".asax",
+   ".vsmdi",
+   ".testsettings",
+   ".xdr",
+   ".rdf",
+   ".ashx",
+   ".sitemap",
+   ".xss",
+   ".snippet",
+   ".xsc",
+   ".settings",
+   ".dgml",
+   ".hxa",
+   ".hxf",
+   ".hxv",
+   ".ascx"],
+  "audio/aac": [".adts", ".aac"],
+  "audio/aiff": [".AIFF", ".cdda", ".AIF", ".AIFC"],
+  "audio/basic": [".snd", ".SND", ".au", ".AU"],
+  "audio/mid": [".MID", ".RMI", ".MIDI"],
+  "audio/mpeg": [".mp2", ".MP2", ".mp3"],
+  "audio/ogg": [".oga", ".ogg", ".spx"],
+  "audio/wav": [".wav", ".wave"],
+  "audio/x-aiff": [".aiff", ".aifc", ".aif"],
+  "image/bmp": [".bmp", ".dib"],
+  "image/jpeg": [".jpe", ".jpg", ".jfif", ".jpeg"],
+  "image/pict": [".pict", ".pic", ".pct"],
+  "image/tiff": [".tif", ".tiff"],
+  "image/vnd.ms-photo": [".wdp", ".jxr"],
+  "image/x-macpaint": [".pntg", ".pnt", ".mac"],
+  "image/x-quicktime": [".qtif", ".qti"],
+  "message/rfc822": [".nws", ".mht", ".mhtml", ".eml"],
+  "text/html": [".htm", ".shtml", ".html"],
+  "text/plain": [".vssscc",
+   ".njsperf",
+   ".vspscc",
+   ".sol",
+   ".ppw",
+   ".gitattributes",
+   ".pkgdef",
+   ".csproj",
+   ".h",
+   ".cs",
+   ".php",
+   ".pyw",
+   ".tpl",
+   ".jsx",
+   ".txt",
+   ".php5",
+   ".py",
+   ".cd",
+   ".vsscc",
+   ".tt",
+   ".jsxbin",
+   ".ppj",
+   ".pkgundef",
+   ".ts",
+   ".gitmodules",
+   ".bat",
+   ".c",
+   ".vb",
+   ".gitignore",
+   ".tsx",
+   ".sln",
+   ".njsproj",
+   ".php4",
+   ".resjson",
+   ".sor",
+   ".ksh",
+   ".vbproj",
+   ".pl",
+   ".user",
+   ".XOML"],
+  "text/scriptlet": [".wsc", ".sct"],
+  "text/x-html-insertion": [".qht", ".qhtm"],
+  "text/x-sgml": [".sgml", ".sgm"],
+  "text/xml": [".vsixmanifest",
+   ".vsixlangpack",
+   ".xrm-ms",
+   ".vsct",
+   ".AddIn",
+   ".natvis",
+   ".dtsConfig",
+   ".xsl",
+   ".xml",
+   ".vssettings",
+   ".SSISDeploymentManifest",
+   ".vstemplate"],
+  "video/3gpp": [".3gp", ".3gpp"],
+  "video/3gpp2": [".3gp2", ".3g2"],
+  "video/mp4": [".mp4", ".mp4v"],
+  "video/mpeg": [".mpa",
+   ".mpv2",
+   ".M2V",
+   ".m1v",
+   ".mpg",
+   ".mod",
+   ".mpe",
+   ".MP2V",
+   ".tod",
+   ".mpeg",
+   ".M1V"],
+  "video/quicktime": [".qt", ".mqv", ".mov"],
+  "video/vnd.dlna.mpeg-tts": [".m2t", ".tts", ".mts", ".m2ts"],
+  "video/x-dv": [".dv", ".dif"],
+  "video/x-ms-asf": [".ASX", ".asf"],
+  "video/x-sgi-movie": [".movie"]}

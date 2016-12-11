@@ -1,0 +1,27 @@
+
+## LINKS:
+http://stackoverflow.com/questions/12136850/tab-delimited-file-using-csv-reader-not-delimiting-where-i-expect-it-to
+http://stackoverflow.com/questions/3323770/character-detection-in-a-text-file-in-python-using-the-universal-encoding-detect
+http://stackoverflow.com/questions/9804777/how-to-test-if-a-string-is-json-or-not
+http://stackoverflow.com/questions/9652832/how-to-i-load-a-tsv-file-into-a-pandas-dataframe
+https://pypi.python.org/pypi/filemagic/1.6
+https://docs.python.org/3.6/library/mimetypes.html
+
+
+## TO DO
+todo: implement more filetpyes
+todo: analyze performance
+todo: handle synonymous filetypes
+  # ex: disco is same as xml.  need to think about how to implement this
+  # I could look at list https://www.file-extensions.org/extensions/common-file-extension-list
+  # maybe openFile[filetype]().  openFile = {disco: open_xml, xml: open_xml
+
+
+##  NOTES
+modulename in sys.modules to check if module has been imported
+
+filetype mapping to opener func:
+* have dictionary of types to functions? <- this is want i want to map multiple filetypes to one function
+* what if func arguments vary by function?  ex: one function accepts size param, other does not
+*   sol: have all functions implement *args param
+*   what about char detecting?

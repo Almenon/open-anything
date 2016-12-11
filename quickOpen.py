@@ -1,48 +1,31 @@
-from importlib import import_module
 from os import path
-from codecs import BOM_UTF32_LE,BOM_UTF32_BE,BOM_LE,BOM_UTF8,BOM_BE
 from sys import version_info
-#importlib.find_loader()
-#importlib.import_module()
+from importlib import import_module
+from openers import OpenFuncs
+from fileTypes import Openers
+import logging
+import mimetypes
+import imghdr
+import sndhdr
 
-protocols = ['https://','http://','www.']
+protocols = ['https://', 'http://', 'www.']
 
-def qopen(name,size=None):
+if version_info >= (3, 4, 5):
     try:
-        fileName, fileType = path.splitext(name)
-        if(is_website(name)):
-            return open_website(name)
-        elif(fileType == '.csv'):
-            return openDelimitedFile(name, ',')
-        elif(fileType == '.tsv'):
-            return openDelimitedFile(name, '\t')
-        elif(fileType == '.json'):
-            return openJson(name)
-        elif(fileType == '.lnk'):
-            return openLnk(name)
-        elif(fileType == '.xml'):
-            return openXml(name)
-        else:
-            return openTextFile(name, size)
-    except MemoryError as e:
-        print("Memory Error - can't load in entire file.")
-        if(fileType not in ['.json','.xml']):
-            print('Loading in first 2048 bytes instead')
-            qopen(name,2048)
-        else: print(e)
+        module = import_module('ipaddress')
+        ip_address = getattr(module, 'ip_address')
+    except ImportError: pass
 
 
 def is_website(name):
     return any([protocol in name for protocol in protocols]) \
             or is_ip(name) \
-            or 'localhost' in name[:9]
+            or 'localhost' in name[:9] or 'http://localhost' in name[:16] or 'https://localhost' in name[:17]
 
 
 def is_ip(name):
-    if version_info >= (3,4,5):
+    if ip_address is not None:
         try:
-            module = import_module('ipaddress')
-            ip_address = getattr(module, 'ip_address')
             ip_address(name) # doesn't accept binary IP's
             return True
         except ValueError:
@@ -83,185 +66,82 @@ def check_ipv6(value): # credit to wtforms
         return True
     return False
 
-
-def get_encoding(name):
+def simple_magic(name):
+    mimeType = None
     try:
-        module = import_module('chardet')
-        detect = getattr(module, 'detect')
-        with open(name, 'rb') as f:
-            encoding = detect(f.read(1024))
-            print(encoding)
-            return encoding['encoding']
-    except ImportError:
-        with open(name,'rb') as f:
-            encoding = check_boms(f.read(4))
-            return encoding
+        with open(name) as f:
+            firstChar = f.read(1)
+            if firstChar == '<':
+                firstLine = f.readline(limit=13)
+                if 'html' in firstLine.casefold():
+                    mimeType = "text/html"
+                else: mimeType = 'text/xml'
+            elif firstChar == '{[':
+                mimeType = 'application/json'
+            else:
+                mimeType = 'text/plain'
+    except UnicodeDecodeError:
+        fileType = imghdr.what(name) # just reads in first 32 bytes
+        if fileType is not None: mimeType = 'image/' + fileType
+        if fileType is None:
+            fileType = sndhdr.what(name) # reads in 512 bytes
+            if fileType is not None: mimeType = 'audio/' + fileType
+        return mimeType if mimeType is not None else "application/octet-stream" # aka binary
 
-
-def check_boms(byte_str): # adapted from chardet library
-    if byte_str.startswith(BOM_UTF8):
-        # EF BB BF  UTF-8 with BOM
-        return "UTF-8-SIG"
-    elif byte_str.startswith(BOM_UTF32_LE) or byte_str.startswith(BOM_UTF32_BE):
-        # FF FE 00 00  UTF-32, little-endian BOM
-        # 00 00 FE FF  UTF-32, big-endian BOM
-        return "UTF-32"
-    elif byte_str.startswith(BOM_LE) or byte_str.startswith(BOM_BE):
-        # FF FE  UTF-16, little endian BOM
-        # FE FF  UTF-16, big endian BOM
-        return "UTF-16"
-    return None
-
-
-def openXml(name):
-    module = import_module('xml.etree.ElementTree')
-    parse = getattr(module, 'parse')
-    return parse(name)
-
-
-def openLnk(name):
-    print('lnk files not supported yet\n'
-          'try installing https://pypi.python.org/pypi/pylnk/')
-
-
-def openJson(name):
-    module = import_module('json')
-    load = getattr(module, 'load')
-    with open(name) as f:
-        return load(f)
-
-
-def open_website(url):
-    module = import_module('urllib.request')
-    urlopen = getattr(module, 'urlopen')
-    return urlopen(url)
-    # todo: check "Content-type" HTTP header, call method for parsing that content type
-
-
-def openTextFile(name, size):
-    with open(name,encoding=get_encoding(name)) as f:
-        return f.read(size)
-
-
-def openDelimitedFile(name,delimiter):
+def guess_type(name):
     try:
-        module = import_module('pandas')
-        read_csv = getattr(module,'read_csv')
-        return read_csv(name,sep=delimiter)
+        with open(name) as f:
+            module = import_module('magic')
+            from_buffer = getattr(module, 'from_buffer')
+            mime = from_buffer(f.read(1024))
     except ImportError:
-        module = import_module('csv')
-        DictReader = getattr(module,'DictReader')
-        with open(name,encoding=get_encoding(name)) as f:
-            csvReader = DictReader(f,delimiter=delimiter)
-            return [line for line in csvReader]
+        mime = simple_magic(name)
+    fileType = mimetypes.guess_extension(mime)
+    return fileType if fileType is not None else '.txt'
 
-def open_word_doc(name):
-    raise NotImplementedError
-    # https://python-docx.readthedocs.io/en/latest/index.html
-
-
-def open_excel(name):
-    raise NotImplementedError
-    # http://www.python-excel.org/
-    # or just use pandas
-    # http://stackoverflow.com/questions/3239207/how-can-i-open-an-excel-file-in-python
-
-
-def open_pdf(name):
-    raise NotImplementedError
-    # https://github.com/mstamy2/PyPDF2
-
-
-def open_epub(name):
-    raise NotImplementedError
-    # https://pypi.python.org/pypi/epub/
-
-
-def open_kdbx(name):
-    raise NotImplementedError
-    # https://pypi.python.org/pypi/libkeepass
-
-
-def open_odt(name):
-    raise NotImplementedError
-    # https://pypi.python.org/pypi/odfpy
-
-
-def open_html(name):
-    raise NotImplementedError
-    # try beautiful soup
-    # else try python inbuilt html parser
-
-
-def open_wav(name):
-    raise  NotImplementedError
-    # https://docs.python.org/3/library/wave.html
+def qopen(name, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, fileType=None, size=None, *args, **kwargs):
+    """
+    :param name: name of file
+    :param mode: duh
+    :param encoding: if None encoding is guessed with chardet library
+    :param fileType: open a file as that fileType
+    :param size: size in bytes.  Ignored with some filetypes, like xml
+    :param *args: passed to parsing engine if non-simple format
+    :param **kwargs: passed to parsing engine if non-simple format
+    """
+    try:
+        if fileType is None:
+            fileType = path.splitext(name)[1] # what about .tar.gzip?
+            if fileType == '':
+                fileType = guess_type(name)
+                noGuessing = True # no point in guessing again
+        else:
+            noGuessing = True
+        if(is_website(name)):
+            OpenFuncs(mode, buffering, encoding, errors, newline, closefd, fileType, size)
+            return OpenFuncs.open_website(*args,**kwargs)
+        else:
+            try:
+                try:
+                    OpenFuncs(mode, buffering, encoding, errors, newline, closefd, fileType, size)
+                    return Openers[fileType](*args, **kwargs)
+                except KeyError:
+                    if noGuessing: raise ValueError('No opener for filetype: ' + fileType)
+                    OpenFuncs.fileType = guess_type(name)
+                    return Openers[fileType](name, mode, buffering, encoding, errors, newline, closefd, fileType, size,
+                                             *args, **kwargs)
+            except UnicodeDecodeError:
+                logging.warning('Unknown encoding')
+                # todo: change filemode to bytes
+    except MemoryError as e:
+        logging.warning("Memory Error - can't load in entire file.")
+        if(fileType not in ['.json','.xml']):
+            print('Loading in first 2048 bytes instead')
+            qopen(name, size=2048)
+        else: print(e)
 
 
-def open_au(name):
-    raise NotImplementedError
-    # https://docs.python.org/3.6/library/sunau.html
 
 
-def open_aiff(name):
-    raise NotImplementedError
-    # https://docs.python.org/3.6/library/aifc.html
-
-
-def open_aifc(name):
-    raise NotImplementedError
-    # https://docs.python.org/3.6/library/aifc.html
-
-
-def open_gzip(name):
-    raise NotImplementedError
-    # https://docs.python.org/3.6/library/gzip.html
-
-
-def open_zip(name):
-    raise NotImplementedError
-    # https://docs.python.org/3.6/library/zipfile.html
-
-
-def open_tar(name):
-    raise NotImplementedError
-    # https://docs.python.org/3.6/library/tarfile.html
-
-
-def open_p(name):
-    raise NotImplementedError
-    # https://docs.python.org/3.6/library/pickle.html
-
-
-def open_netrx(name):
-    raise NotImplementedError
-    # https://docs.python.org/3.6/library/netrc.html
-
-
-def open_plist(name):
-    raise NotImplementedError
-    # https://docs.python.org/3.6/library/plistlib.html
-
-
-def open_ini(name):
-    raise NotImplementedError
-    # https://docs.python.org/3.6/library/configparser.html
-
-
-def open_sav(name):
-    raise NotImplementedError
-    # https://pypi.python.org/pypi/savReaderWriter/3.4.2
-
-# result = qopen('testFiles\\t.xml')
-# print(result)
-
-# links::
-# http://stackoverflow.com/questions/12136850/tab-delimited-file-using-csv-reader-not-delimiting-where-i-expect-it-to
-# http://stackoverflow.com/questions/3323770/character-detection-in-a-text-file-in-python-using-the-universal-encoding-detect
-# http://stackoverflow.com/questions/9804777/how-to-test-if-a-string-is-json-or-not
-# http://stackoverflow.com/questions/9652832/how-to-i-load-a-tsv-file-into-a-pandas-dataframe
-
-# guess file type?
-
-# https://pypi.python.org/pypi/filemagic/1.6
-# https://docs.python.org/3.6/library/mimetypes.html
+#result = qopen('testFiles\\t.xml')
+#print(result)
