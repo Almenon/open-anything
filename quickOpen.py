@@ -1,9 +1,15 @@
 from importlib import import_module
-from os import path
+from os import path,stat
 from codecs import BOM_UTF32_LE,BOM_UTF32_BE,BOM_LE,BOM_UTF8,BOM_BE
+from chardet import detect
 from sys import version_info
 #importlib.find_loader()
 #importlib.import_module()
+
+if version_info >= (3,3,6):
+    module = import_module('ipaddress')
+    ip_address = getattr(module, 'ip_address')
+else: ip_address = None
 
 protocols = ['https://','http://','www.']
 
@@ -22,8 +28,14 @@ def qopen(name,size=None):
             return openLnk(name)
         elif(fileType == '.xml'):
             return openXml(name)
-        else:
+        elif(fileType == '.txt'):
             return openTextFile(name, size)
+        else:
+            print('Unrecognized filetype - defaulting to text')
+            return openTextFile(name, size)
+    except NotImplementedError:
+        print('The opener for this filetype is not yet written - defaulting to text')
+        return openTextFile(name, size)
     except MemoryError as e:
         print("Memory Error - can't load in entire file.")
         if(fileType not in ['.json','.xml']):
@@ -39,15 +51,13 @@ def is_website(name):
 
 
 def is_ip(name):
-    if version_info >= (3,4,5):
+    if ip_address:
         try:
-            module = import_module('ipaddress')
-            ip_address = getattr(module, 'ip_address')
             ip_address(name) # doesn't accept binary IP's
             return True
         except ValueError:
             return False
-    else: # darnit, upgrade your python
+    else:
         return check_ipv4(name) or check_ipv6(name)
 
 
@@ -85,16 +95,14 @@ def check_ipv6(value): # credit to wtforms
 
 
 def get_encoding(name):
-    try:
-        module = import_module('chardet')
-        detect = getattr(module, 'detect')
-        with open(name, 'rb') as f:
+    with open(name, 'rb') as f:
+        if(stat(name).st_size > 256): #chardet needs at least 256 chars for accuracy
             encoding = detect(f.read(1024))
             print(encoding)
             return encoding['encoding']
-    except ImportError:
-        with open(name,'rb') as f:
+        else:
             encoding = check_boms(f.read(4))
+            if encoding is None: encoding = 'utf8' # safest assumption
             return encoding
 
 
