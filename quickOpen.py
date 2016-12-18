@@ -1,10 +1,8 @@
 from importlib import import_module
-from os import path,stat
-from codecs import BOM_UTF32_LE,BOM_UTF32_BE,BOM_LE,BOM_UTF8,BOM_BE
-from chardet import detect
+from os import path
 from sys import version_info
-#importlib.find_loader()
-#importlib.import_module()
+from fileTypes import openDict
+from openers import open_website
 
 if version_info >= (3,3,6):
     module = import_module('ipaddress')
@@ -15,27 +13,20 @@ protocols = ['https://','http://','www.']
 
 def qopen(name,size=None):
     try:
-        fileName, fileType = path.splitext(name)
+        fileType = path.splitext(name)[1].casefold()
         if(is_website(name)):
             return open_website(name)
-        elif(fileType == '.csv'):
-            return openDelimitedFile(name, ',')
-        elif(fileType == '.tsv'):
-            return openDelimitedFile(name, '\t')
-        elif(fileType == '.json'):
-            return openJson(name)
-        elif(fileType == '.lnk'):
-            return openLnk(name)
-        elif(fileType == '.xml'):
-            return openXml(name)
-        elif(fileType == '.txt'):
-            return openTextFile(name, size)
-        else:
-            print('Unrecognized filetype - defaulting to text')
-            return openTextFile(name, size)
-    except NotImplementedError:
-        print('The opener for this filetype is not yet written - defaulting to text')
-        return openTextFile(name, size)
+        elif fileType != '':
+            try:
+                return openDict[fileType](name)
+            except KeyError:
+                # todo: guess type
+                pass
+            except NotImplementedError:
+                # default to text
+                pass
+        print('Unrecognized filetype - defaulting to text')
+        return openDict['.txt'](name)
     except MemoryError as e:
         print("Memory Error - can't load in entire file.")
         if(fileType not in ['.json','.xml']):
@@ -93,172 +84,6 @@ def check_ipv6(value): # credit to wtforms
         return True
     return False
 
-
-def get_encoding(name):
-    with open(name, 'rb') as f:
-        if(stat(name).st_size > 256): #chardet needs at least 256 chars for accuracy
-            encoding = detect(f.read(1024))
-            print(encoding)
-            return encoding['encoding']
-        else:
-            encoding = check_boms(f.read(4))
-            if encoding is None: encoding = 'utf8' # safest assumption
-            return encoding
-
-
-def check_boms(byte_str): # adapted from chardet library
-    if byte_str.startswith(BOM_UTF8):
-        # EF BB BF  UTF-8 with BOM
-        return "UTF-8-SIG"
-    elif byte_str.startswith(BOM_UTF32_LE) or byte_str.startswith(BOM_UTF32_BE):
-        # FF FE 00 00  UTF-32, little-endian BOM
-        # 00 00 FE FF  UTF-32, big-endian BOM
-        return "UTF-32"
-    elif byte_str.startswith(BOM_LE) or byte_str.startswith(BOM_BE):
-        # FF FE  UTF-16, little endian BOM
-        # FE FF  UTF-16, big endian BOM
-        return "UTF-16"
-    return None
-
-
-def openXml(name):
-    module = import_module('xml.etree.ElementTree')
-    parse = getattr(module, 'parse')
-    return parse(name)
-
-
-def openLnk(name):
-    print('lnk files not supported yet\n'
-          'try installing https://pypi.python.org/pypi/pylnk/')
-
-
-def openJson(name):
-    module = import_module('json')
-    load = getattr(module, 'load')
-    with open(name) as f:
-        return load(f)
-
-
-def open_website(url):
-    module = import_module('urllib.request')
-    urlopen = getattr(module, 'urlopen')
-    return urlopen(url)
-    # todo: check "Content-type" HTTP header, call method for parsing that content type
-
-
-def openTextFile(name, size):
-    with open(name,encoding=get_encoding(name)) as f:
-        return f.read(size)
-
-
-def openDelimitedFile(name,delimiter):
-    try:
-        module = import_module('pandas')
-        read_csv = getattr(module,'read_csv')
-        return read_csv(name,sep=delimiter)
-    except ImportError:
-        module = import_module('csv')
-        DictReader = getattr(module,'DictReader')
-        with open(name,encoding=get_encoding(name)) as f:
-            csvReader = DictReader(f,delimiter=delimiter)
-            return [line for line in csvReader]
-
-def open_word_doc(name):
-    raise NotImplementedError
-    # https://python-docx.readthedocs.io/en/latest/index.html
-
-
-def open_excel(name):
-    raise NotImplementedError
-    # http://www.python-excel.org/
-    # or just use pandas
-    # http://stackoverflow.com/questions/3239207/how-can-i-open-an-excel-file-in-python
-
-
-def open_pdf(name):
-    raise NotImplementedError
-    # https://github.com/mstamy2/PyPDF2
-
-
-def open_epub(name):
-    raise NotImplementedError
-    # https://pypi.python.org/pypi/epub/
-
-
-def open_kdbx(name):
-    raise NotImplementedError
-    # https://pypi.python.org/pypi/libkeepass
-
-
-def open_odt(name):
-    raise NotImplementedError
-    # https://pypi.python.org/pypi/odfpy
-
-
-def open_html(name):
-    raise NotImplementedError
-    # try beautiful soup
-    # else try python inbuilt html parser
-
-
-def open_wav(name):
-    raise  NotImplementedError
-    # https://docs.python.org/3/library/wave.html
-
-
-def open_au(name):
-    raise NotImplementedError
-    # https://docs.python.org/3.6/library/sunau.html
-
-
-def open_aiff(name):
-    raise NotImplementedError
-    # https://docs.python.org/3.6/library/aifc.html
-
-
-def open_aifc(name):
-    raise NotImplementedError
-    # https://docs.python.org/3.6/library/aifc.html
-
-
-def open_gzip(name):
-    raise NotImplementedError
-    # https://docs.python.org/3.6/library/gzip.html
-
-
-def open_zip(name):
-    raise NotImplementedError
-    # https://docs.python.org/3.6/library/zipfile.html
-
-
-def open_tar(name):
-    raise NotImplementedError
-    # https://docs.python.org/3.6/library/tarfile.html
-
-
-def open_p(name):
-    raise NotImplementedError
-    # https://docs.python.org/3.6/library/pickle.html
-
-
-def open_netrx(name):
-    raise NotImplementedError
-    # https://docs.python.org/3.6/library/netrc.html
-
-
-def open_plist(name):
-    raise NotImplementedError
-    # https://docs.python.org/3.6/library/plistlib.html
-
-
-def open_ini(name):
-    raise NotImplementedError
-    # https://docs.python.org/3.6/library/configparser.html
-
-
-def open_sav(name):
-    raise NotImplementedError
-    # https://pypi.python.org/pypi/savReaderWriter/3.4.2
 
 # result = qopen('testFiles\\t.xml')
 # print(result)
