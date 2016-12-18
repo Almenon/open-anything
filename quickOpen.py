@@ -11,14 +11,40 @@ else: ip_address = None
 
 protocols = ['https://','http://','www.']
 
-def qopen(name,size=None):
+class OpenArguments():
+    def __init__(self, file, mode, buffering, encoding, errors, newline, closefd):
+        self.file = file
+        self.mode = mode
+        self.buffering = buffering
+        self.encoding = encoding
+        self.errors = errors
+        self.newline = newline
+        self.closefd = closefd
+
+    # these params are here so class can be unpacked into open()
+    def keys(self):
+        return ['file', 'mode', 'buffering', 'encoding', 'errors', 'newline', 'closefd']
+
+    def __getitem__(self, key):
+        return self.__dict__[key]
+
+def qopen(name, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, fileType=None, size=None, *args, **kwargs):
+    """
+    :param name: name of file
+    :param encoding: if None encoding is guessed with chardet library
+    :param fileType: open a file as that fileType
+    :param size: size in bytes.  Ignored with some filetypes, like xml
+    :param *args: passed to parsing engine if non-simple format
+    :param **kwargs: passed to parsing engine if non-simple format
+    """
+    openArgs = OpenArguments(name, mode, buffering, encoding, errors, newline, closefd)
     try:
         fileType = path.splitext(name)[1].casefold()
         if(is_website(name)):
             return open_website(name)
         elif fileType != '':
             try:
-                return openDict[fileType](name)
+                return openDict[fileType](openArgs, fileType, size)
             except KeyError:
                 # todo: guess type
                 pass
@@ -26,12 +52,12 @@ def qopen(name,size=None):
                 # default to text
                 pass
         print('Unrecognized filetype - defaulting to text')
-        return openDict['.txt'](name)
+        return openDict['.txt'](openArgs, fileType, size)
     except MemoryError as e:
         print("Memory Error - can't load in entire file.")
         if(fileType not in ['.json','.xml']):
             print('Loading in first 2048 bytes instead')
-            qopen(name,2048)
+            qopen(openArgs, fileType, size=2048)
         else: print(e)
 
 
