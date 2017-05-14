@@ -1,4 +1,4 @@
-# QOPEN:
+# QOPEN: [![Build Status](https://travis-ci.org/Almenon/open-anything.svg?branch=master)](https://travis-ci.org/Almenon/open-anything)
 
 Open anything in one line.
 
